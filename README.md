@@ -286,7 +286,7 @@ $ lynx www.abimanyu.b18.com
 
 Maka akan muncul tampilan seperti ini.
 
-<< Tampilan >>
+![abimanyu.b18.com](images/11.png)
 
 ## Nomor 12
 
@@ -328,7 +328,7 @@ $ lynx www.abimanyu.b18.com/home
 
 Maka akan muncul tampilan seperti ini.
 
-<< Tampilan >>
+![abimanyu.b18.com/home](images/12.png)
 
 ## Nomor 13
 
@@ -364,12 +364,12 @@ $ service apache2 restart
 Untuk mencobanya, kita bisa ke node client lalu menjalankan command
 
 ```
-$ lynx www.parikesit.abimanyu.b18.com/home
+$ lynx www.parikesit.abimanyu.b18.com
 ```
 
 Maka akan muncul tampilan seperti ini.
 
-<< Tampilan >>
+![parikesit.abimanyu.b18.com](images/13.png)
 
 ## Nomor 14
 
@@ -423,7 +423,7 @@ $ lynx www.parikesit.abimanyu.b18.com/secret
 
 Maka akan muncul tampilan seperti ini.
 
-<< Tampilan >>
+![public and secret](images/14.png)
 
 ## Nomor 15
 
@@ -480,7 +480,7 @@ $ lynx www.parikesit.abimanyu.b18.com/link-random
 
 untuk mencoba error 404 not found. Maka akan muncul tampilan seperti ini.
 
-<< Tampilan >>
+![secret dan link random](images/15.png)
 
 ## Nomor 16
 
@@ -533,7 +533,7 @@ $ lynx www.parikesit.abimanyu.b18.com/js
 
 Maka akan muncul tampilan seperti ini.
 
-<< Tampilan >>
+![parikesit.abimanyu.b18.com/js](images/16.png)
 
 ## Nomor 17
 
@@ -581,7 +581,7 @@ $ lynx www.rjp.baratayuda.abimanyu.b18.com
 ```
 
 Tampilan yang muncul yaitu 403 forbidden.
-<< Tampilan forbidden >>
+![port 80](images/17-1.png)
 
 Jika kita menjalankan command berikut,
 
@@ -593,7 +593,7 @@ $ lynx www.rjp.baratayuda.abimanyu.b18.com:14400
 
 Maka akan muncul tampilan seperti ini.
 
-<< Tampilan >>
+![port 14000 and 14400](images/17-2.png)
 
 ## Nomor 18
 
@@ -658,7 +658,9 @@ $ lynx www.rjp.baratayuda.abimanyu.b18.com:14400
 
 Maka akan muncul tampilan seperti ini.
 
-<< Tampilan >>
+![autentikasi username](images/18-1.png)
+![autentikasi password](images/18-2.png)
+![berhasil autentikasi](images/18-3.png)
 
 ## Nomor 19
 
@@ -701,7 +703,7 @@ $ lynx 192.187.1.2
 
 Maka akan muncul tampilan seperti ini.
 
-<< Tampilan >>
+![192.187.1.2](images/19.png)
 
 ## Nomor 20
 
@@ -779,4 +781,4 @@ $ lynx www.parikesit.abimanyu.b18.com/ini/adalah/test/testabimanyutest.png
 
 Maka akan muncul tampilan seperti ini untuk mendownload file `/public/images/abimanyu.png`
 
-<< Tampilan >>
+![download abimanyu.png](images/20.png)
