@@ -19,7 +19,8 @@ Topologi yang kelompok B18 gunakan adalah topologi [04,](https://drive.google.co
 
 > Topologi Kelompok B18
 
-![topologi](images/1.1.jpeg)
+![topologi](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/53a2e6eb-f4e6-429e-84fc-15547805a4ae)
+
 
 **Konfigurasi Node**
 
