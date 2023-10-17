@@ -18,8 +18,8 @@ Yudhistira akan digunakan sebagai DNS Master, Werkudara sebagai DNS Slave, Arjun
 Topologi yang kelompok B18 gunakan adalah topologi [04,](https://drive.google.com/drive/folders/1Ij9J1HdIW4yyPEoDqU1kAwTn_iIxg3gk) dimana **NAT1** terhubung ke **Router**, yang kemudian terhubung ke 3 switch yang masing-masing terhubung ke beberapa node. Seperti **Switch1** yang terhubung ke node **DNS**, lalu **Switch2** yang terhubung ke node **Load Balancer** dan **Web Server**, sedangan **Switch3** terhubung ke node **Client**
 
 > Topologi Kelompok B18
-![topologi](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/109b7ef7-7799-4223-bd1c-a422269654e1)
 
+![topologi](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/109b7ef7-7799-4223-bd1c-a422269654e1)
 
 **Konfigurasi Node**
 
@@ -206,7 +206,11 @@ ping www.arjuna.b18.com
 ping www.abimanyu.b18.com
 ```
 
-FOTO TESTING 23
+![testing23](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/3248d28e-fb85-401d-b366-936f39505f36)
+
+> **arjuna.b18.com**
+
+![arjuna](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/e442b310-4f3a-4b40-b99e-e9668ac357c6)
 
 ## Nomor 4
 
@@ -256,7 +260,7 @@ ATAU
 host -t A parikesit.abimanyu.b18.com
 ```
 
-FOTO TESTING 4
+![testing4](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/674cecf4-a159-4767-b0fa-d7b942263ab3)
 
 ## Nomor 5
 
@@ -307,13 +311,9 @@ karena diminta hanya melakukan reverse domain abimanyu maka kita lihat IPnya abi
   2                         IN      PTR     abimanyu.b18.com.
   ```
 
-**Testing**
+> **named.conf.local** _Yudhistira_
 
-```
-host -t PTR 192.187.1.2
-```
-
-FOTO TESTTING 5
+![nclmstr](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/0f76a291-d40a-4c29-9d26-27320683cec8)
 
 ## Nomor 6
 
@@ -381,33 +381,209 @@ ping arjuna.b18.com
 ping abimanyu.b18.com
 ```
 
-![image](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/4f84d7e3-3ac5-4c56-8c5b-5af93339b859)
-
+![testing6](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/3c081881-9cc2-4317-8e25-26b1c4a1fcb6)
 
 ## Nomor 7
 
 ### Soal
+
 Seperti yang kita tahu karena banyak sekali informasi yang harus diterima, buatlah subdomain khusus untuk perang yaitu **baratayuda.abimanyu.yyy.com** dengan alias **www.baratayuda.abimanyu.yyy.com** yang didelegasikan dari Yudhistira ke Werkudara dengan IP menuju ke Abimanyu dalam folder Baratayuda.
 
 ### Pembahasan
 
 **Konfigurasi Yudhistira**
+
 - Edit file **abimanyu.b18.com**
 
   ```
   nano /etc/bind/website/abimanyu.b18.com
   ```
-  Karena hanya domain *Abimanyu* yang diminta untuk di delegasi
+
+  Karena hanya domain _Abimanyu_ yang diminta untuk di delegasi
 
 - Tambahkan syntax berikut
 
   ```
-  ns1    	  IN      A       192.187.2.3 
+  ns1             IN      A       192.187.2.3
   baratayuda      IN      NS      ns1
   ```
+
   bisa dilihat bahwa name server baratayda mengarah ke ns1 sedangkan ns1 mengarahkan IP nya ke DNS SLAVE
 
 **Konfigurasi Werkudara**
+
+- Edit file **named.conf.local**
+
+  ```
+  nano /etc/bind/named.conf.local
+  ```
+
+- Lalu tambahkan zone untuk delegasi
+
+  ```
+  zone "baratayuda.abimanyu.b18.com" {
+    type master;
+    file "/etc/bind/baratayuda/baratayuda.abimanyu.b18.com";
+  };
+  ```
+
+> file **abimanyu.b18.com**
+
+![abimanyu](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/d30909df-fd63-4e33-8fb8-30e9c11809df)
+
+> **named.conf.local** _Werkudara_
+
+![image](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/698a0156-3cc2-4dd6-9068-3ca2cf60e2c9)
+
+**Testing**
+
+```
+ping baratayuda.abimanyu.b18.com
+ping www.baratayuda.abimanyu.b18.com
+```
+
+![testing7](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/1fedcf11-ae77-4fd8-a00a-b281fb20897d)
+
+## Nomor 8
+
+### Soal
+Untuk informasi yang lebih spesifik mengenai Ranjapan Baratayuda, buatlah subdomain melalui Werkudara dengan akses **rjp.baratayuda.abimanyu.yyy.com** dengan alias **www.rjp.baratayuda.abimanyu.yyy.com** yang mengarah ke Abimanyu.
+
+### Pembahasan
+Langkah-langkah pembuatan subdomain masih sama seperti nomor 7
+
+- Edit file **baratayuda.abimanyu.b18.com** dan tambahkan alias untuk rjp
+
+  ```
+  nano /etc/bind/baratayuda/baratayuda.abimanyu.b18.com
+  ```
+
+> file **baratayuda.abimanyu.b18.com**
+
+![baratayuda](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/2829a59d-9934-4533-9fef-15ffceba5ba0)
+
+**Testing**
+
+```
+ping rjp.baratayuda.abimanyu.b18.com
+ping www.rjp.baratayuda.abimanyu.b18.com
+```
+
+![testing8](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/9ab937b1-1548-42df-b2b3-ec89dc050751)
+
+
+## Nomor 9
+
+### Soal
+Arjuna merupakan suatu Load Balancer Nginx dengan tiga worker (yang juga menggunakan nginx sebagai webserver) yaitu Prabakusuma, Abimanyu, dan Wisanggeni. Lakukan deployment pada masing-masing worker.
+
+### Pembahasan
+
+**Worker**
+
+- Untuk nomor ini workernya adalah abimanyu, prabukusuma dan wisanggeni. Lakukan perintah berikut pada setiap worker
+
+  ```
+  nano /var/www/arjuna.b18
+  ```
+
+  jadi di setiap web server tersebut kita akan mengedit index.phpnya dengan syntax seperti berikut.
+
+  ![indexphp](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/d41aec06-1c1c-487b-9436-82dcfdc15a40)
+
+
+- Lalu edit file **arjuna.b18**
+
+  ```
+  nano /etc/nginx/sites-available
+  ```
+  
+  kemudian isi dengan konfigurasi server block ini:
+
+  ```
+    server {
+
+    listen 80;
+
+    root /var/www/jarkom;
+
+    index index.php index.html index.htm;
+    server_name _;
+
+    location / {
+      try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    # pass PHP scripts to FastCGI server
+    location ~ \.php$ {
+    include snippets/fastcgi-php.conf;
+    fastcgi_pass unix:/var/run/php/php7.2-fpm.sock;
+    }
+
+  location ~ /\.ht {
+        deny all;
+    }
+
+    error_log /var/log/nginx/jarkom_error.log;
+    access_log /var/log/nginx/jarkom_access.log;
+    }
+  ```
+
+  dimana version diganti sesuai dengan version di laptop masing-masing
+
+
+
+**Load Balancer**
+- Edit file **lb-arjuna**
+
+  ```
+  nano /etc/nginx/sites-available/lb-arjuna
+  ```
+
+  Lalu edit menjadi seperti berikut. Dimana upstream berisikan IP worker dan server name sesuai yang diminta
+
+  ![lbarjuna](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/6d5cd8e4-945b-434a-a51e-7e0395910f5f)
+
+## Nomor 10
+
+### Soal
+Kemudian gunakan algoritma Round Robin untuk Load Balancer pada Arjuna. Gunakan server_name pada soal nomor 1. Untuk melakukan pengecekan akses alamat web tersebut kemudian pastikan worker yang digunakan untuk menangani permintaan akan berganti ganti secara acak. Untuk webserver di masing-masing worker wajib berjalan di port 8001-8003. Contoh
+- Prabakusuma:8001
+- Abimanyu:8002
+- AbimamWisanggeni:8003
+
+### Pembahasan
+**Worker**
+
+ganti listen menjadi port yang diminta
+```
+listen 800X;
+```
+dimana **X** adalah angka terakhir sesuai soal
+
+**Load Balancer**
+
+Tambahkan nilai port sesuai dengan IP yang diminta
+```
+upstream backend {
+  server 192.187.1.3:8001; # IP PrabuKusuma
+  server 192.187.1.2:8002; # IP Abimanyu
+  server 192.187.1.4:8003; # IP Wisanggeni
+}
+``` 
+
+**Testing 9 dan 10**
+```
+nomor 9
+lynx http://arjuna.b18.com
+
+nomor 10
+lynx [IP WORKER]:[PORT WORKER] 
+```
+![image](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/a0afd172-1dde-477b-855f-4bca3635b0dc)
+![image](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/616f94fa-84fe-42e7-b74a-dba438da1f0d)
+![image](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/9009753a-3e1d-4889-af07-f53995d78d56)
+
 
 
 ## Nomor 11
