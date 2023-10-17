@@ -234,3 +234,250 @@ Subdomain adalah bagian dari sebuah nama domain induk. Subdomain umumnya mengacu
   www.parikesit   IN      CNAME   parikesit.abimanyu.b18.com.
   @       		IN      AAAA    ::1
   ```
+
+## Nomor 11
+
+### Soal
+
+Selain menggunakan Nginx, lakukan konfigurasi Apache Web Server pada worker Abimanyu dengan web server **www.abimanyu.yyy.com**. Pertama dibutuhkan web server dengan DocumentRoot pada /var/www/abimanyu.yyy
+
+### Pembahasan
+
+Pada soal-soal sebelumnya, kita sudah membuat DNS yang menggunakan IP abimanyu yang mengarah pada www.abimanyu.b18.com. Untuk membuat konfigurasi Apache Web Server, kita bisa ke node Abimanyu lalu install apache2 dan php menggunakan command
+
+```bash
+$ apt-get install apache2 libapache2-mod-php7.0 php php-fpm
+```
+
+Lalu pada drive resources, tersedia folder **abimanyu.yyy.com** yang bisa kita rename menjadi **abimanyu.b18** dan copy ke path `/var/www/`. Supaya web tersebut bisa diakses, kita harus bikin file konfigurasi apache2 **abimanyu.b18.com.conf** di `/etc/apache2/sites-available/` yang berisi
+
+> /etc/apache2/sites-available/abimanyu.b18.com.conf
+
+```apache
+<VirtualHost *:80>
+	ServerAdmin webmaster@localhost
+	DocumentRoot /var/www/abimanyu.b18
+	ServerName abimanyu.b18.com
+	ServerAlias www.abimanyu.b18.com
+
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+
+Supaya bisa diakses sebagai website, kita bisa menggunakan command
+
+```
+$ a2ensite abimanyu.b18.com.conf
+```
+
+Lalu mengaktifkan service `php7.0-fpm` dan `apache2` menggunakan command
+
+```
+$ service php7.0-fpm start
+$ service apache2 restart
+```
+
+Untuk mencoba webnya, kita bisa pindah ke node Client-Nakula atau Client-Sadewa, lalu membuka web menggunakan command
+
+```
+$ lynx www.abimanyu.b18.com
+```
+
+Maka akan muncul tampilan seperti ini.
+
+<< Tampilan >>
+
+## Nomor 12
+
+### Soal
+
+Setelah itu ubahlah agar url **www.abimanyu.yyy.com/index.php/home** menjadi **www.abimanyu.yyy.com/home**.
+
+### Pembahasan
+
+Pada node Abimanyu, pada path `/etc/apache2/sites-available/abimanyu.b18.com.conf`, kita bisa menambahkan line berikut
+
+> /etc/apache2/sites-available/abimanyu.b18.com.conf
+
+```apache
+<VirtualHost *:80>
+	ServerAdmin webmaster@localhost
+	DocumentRoot /var/www/abimanyu.b18
+	ServerName abimanyu.b18.com
+	ServerAlias www.abimanyu.b18.com
+
+	Alias "/home" "/var/www/abimanyu.b18/index.php/home"
+
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+
+Lalu restart service `apache2` menggunakan
+
+```
+$ service apache2 restart
+```
+
+Untuk mencobanya, kita bisa ke node client lalu menjalankan command
+
+```
+$ lynx www.abimanyu.b18.com/home
+```
+
+Maka akan muncul tampilan seperti ini.
+
+<< Tampilan >>
+
+## Nomor 13
+
+### Soal
+
+Selain itu, pada subdomain **www.parikesit.abimanyu.yyy.com**, DocumentRoot disimpan pada /var/www/parikesit.abimanyu.yyy
+
+### Pembahasan
+
+Kita bisa menggunakan cara yang sama dengan nomor 11. Kita bisa membuat file konfigurasi seperti berikut di node Abimanyu.
+
+> /etc/apache2/sites-available/parikesit.abimanyu.b18.com.conf
+
+```apache
+<VirtualHost *:80>
+	ServerAdmin webmaster@localhost
+	DocumentRoot /var/www/parikesit.abimanyu.b18
+	ServerName parikesit.abimanyu.b18.com
+	ServerAlias www.parikesit.abimanyu.b18.com
+
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+
+Lalu copy folder yang ada di drive resources ke `/var/www/` dengan nama **parikesit.abimanyu.b18**. Setelah itu, kita bisa mengaktifkan website tersebut dan restart service `apache2` menggunakan
+
+```
+$ a2ensite parikesit.abimanyu.b18.com.conf
+$ service apache2 restart
+```
+
+Untuk mencobanya, kita bisa ke node client lalu menjalankan command
+
+```
+$ lynx www.parikesit.abimanyu.b18.com/home
+```
+
+Maka akan muncul tampilan seperti ini.
+
+<< Tampilan >>
+
+## Nomor 14
+
+### Soal
+
+Pada subdomain tersebut folder /public hanya dapat melakukan directory listing sedangkan pada folder /secret tidak dapat diakses (403 Forbidden).
+
+### Pembahasan
+
+Pada soal ini, kita bisa ke node Abimanyu lalu edit konfigurasi web servernya menjadi seperti berikut.
+
+> /etc/apache2/sites-available/parikesit.abimanyu.b18.com.conf
+
+```apache
+<VirtualHost *:80>
+	ServerAdmin webmaster@localhost
+	DocumentRoot /var/www/parikesit.abimanyu.b18
+	ServerName parikesit.abimanyu.b18.com
+	ServerAlias www.parikesit.abimanyu.b18.com
+
+	<Directory /var/www/parikesit.abimanyu.b18/public>
+    		Options +Indexes
+	</Directory>
+
+	<Directory /var/www/parikesit.abimanyu.b18/secret>
+		Deny from all
+	</Directory>
+
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+
+Lalu restart service `apache2` menggunakan
+
+```
+$ service apache2 restart
+```
+
+Untuk mencobanya, kita bisa ke node client lalu menjalankan command
+
+```
+$ lynx www.parikesit.abimanyu.b18.com/public
+```
+
+dan
+
+```
+$ lynx www.parikesit.abimanyu.b18.com/secret
+```
+
+Maka akan muncul tampilan seperti ini.
+
+<< Tampilan >>
+
+## Nomor 15
+
+### Soal
+
+Buatlah kustomisasi halaman error pada folder /error untuk mengganti error kode pada Apache. Error kode yang perlu diganti adalah 404 Not Found dan 403 Forbidden.
+
+### Pembahasan
+
+Pada soal ini, kita bisa ke node Abimanyu lalu edit konfigurasi web servernya menjadi seperti berikut.
+
+> /etc/apache2/sites-available/parikesit.abimanyu.b18.com.conf
+
+```apache
+<VirtualHost *:80>
+	ServerAdmin webmaster@localhost
+	DocumentRoot /var/www/parikesit.abimanyu.b18
+	ServerName parikesit.abimanyu.b18.com
+	ServerAlias www.parikesit.abimanyu.b18.com
+
+	<Directory /var/www/parikesit.abimanyu.b18/public>
+    		Options +Indexes
+	</Directory>
+
+	<Directory /var/www/parikesit.abimanyu.b18/secret>
+		Deny from all
+	</Directory>
+
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+	ErrorDocument 403 /error/403.html
+	ErrorDocument 404 /error/404.html
+</VirtualHost>
+```
+
+Lalu restart service `apache2` menggunakan
+
+```
+$ service apache2 restart
+```
+
+Untuk mencobanya, kita bisa ke node client lalu menjalankan command
+
+```
+$ lynx www.parikesit.abimanyu.b18.com/secret
+```
+
+untuk mencoba error 403 forbidden, dan
+
+```
+$ lynx www.parikesit.abimanyu.b18.com/link-random
+```
+
+untuk mencoba error 404 not found. Maka akan muncul tampilan seperti ini.
+
+<< Tampilan >>
