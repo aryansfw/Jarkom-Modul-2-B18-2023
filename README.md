@@ -18,8 +18,7 @@ Yudhistira akan digunakan sebagai DNS Master, Werkudara sebagai DNS Slave, Arjun
 Topologi yang kelompok B18 gunakan adalah topologi [04,](https://drive.google.com/drive/folders/1Ij9J1HdIW4yyPEoDqU1kAwTn_iIxg3gk) dimana **NAT1** terhubung ke **Router**, yang kemudian terhubung ke 3 switch yang masing-masing terhubung ke beberapa node. Seperti **Switch1** yang terhubung ke node **DNS**, lalu **Switch2** yang terhubung ke node **Load Balancer** dan **Web Server**, sedangan **Switch3** terhubung ke node **Client**
 
 > Topologi Kelompok B18
-
-![topologi](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/53a2e6eb-f4e6-429e-84fc-15547805a4ae)
+![topologi](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/109b7ef7-7799-4223-bd1c-a422269654e1)
 
 
 **Konfigurasi Node**
@@ -164,7 +163,7 @@ Dengan cara yang sama seperti soal nomor 2, buatlah website utama dengan akses k
 
 > Domain Arjuna
 
-```
+```bind
 $TTL    604800
 @       IN      SOA     arjuna.b18.com. root.arjuna.b18.com. (
                               2         ; Serial
@@ -181,7 +180,7 @@ www     IN      CNAME   arjuna.bl8.com.
 
 > Domain Abimanyu
 
-```
+```bind
 $TTL    604800
 @       IN      SOA     abimanyu.b18.com. root.abimanyu.b18.com. (
                               2         ; Serial
@@ -198,6 +197,17 @@ www     IN      CNAME   abimanyu.bl8.com.
 
 **Testing**
 
+```
+ping arjuna.b18.com
+ping abimanyu.b18.com
+
+ALIASNYA
+ping www.arjuna.b18.com
+ping www.abimanyu.b18.com
+```
+
+FOTO TESTING 23
+
 ## Nomor 4
 
 ### Soal
@@ -210,13 +220,13 @@ Subdomain adalah bagian dari sebuah nama domain induk. Subdomain umumnya mengacu
 
 - Lakukan perintah berikut pada _Yudhistira_ untuk mengedit konfigurasi **abimanyu.b18.com**
 
-  ```
+  ```bash
   nano /etc/bind/website/abimanyu.b18.com
   ```
 
 - Lalu tambahkan subdomain untuk **abimanyu.b18.com** yang mengarah ke IP abimanyu.
 
-  ```
+  ```bind
   ;
   ; BIND data file for local loopback interface
   ;
@@ -235,6 +245,170 @@ Subdomain adalah bagian dari sebuah nama domain induk. Subdomain umumnya mengacu
   www.parikesit   IN      CNAME   parikesit.abimanyu.b18.com.
   @       		IN      AAAA    ::1
   ```
+
+**Testing**
+
+```
+ping parikesit.abimanyu.b18.com -c 3
+
+ATAU
+
+host -t A parikesit.abimanyu.b18.com
+```
+
+FOTO TESTING 4
+
+## Nomor 5
+
+### Soal
+
+Buat juga reverse domain untuk domain utama. (Abimanyu saja yang direverse)
+
+### Pembahasan
+
+karena diminta hanya melakukan reverse domain abimanyu maka kita lihat IPnya abimanyu yaitu **192.187.1.2**
+
+- Pada _Yudhistira_ edit konfigurasi **named.conf.local**. Lalu tambahkan reverse dari 3 byte awal dari IP Abimanyu
+
+  ```
+  nano /etc/bind/named.conf.local
+  ```
+
+- Lalu tambahkan reverse dari 3 byte awal dari IP Abimanyu
+
+  ```
+  zone "1.187.192.in-addr.arpa" {
+    type master;
+    file "/etc/bind/website/1.187.192.in-addr.arpa";
+  };
+  ```
+
+- Edit file 1.187.192.in-addr.arpa
+
+  ```
+  nano /etc/bind/website/1.187.192.in-addr.arpa
+  ```
+
+- Tambahkan byte ke-4 IP abimanyu dengan tipe PTR
+
+  ```bind
+  ;
+  ; BIND data file for local loopback interface
+  ;
+  $TTL    604800
+  @       IN      SOA     abimanyu.b18.com. root.abimanyu.b18.com. (
+                                2         ; Serial
+                          604800          ; Refresh
+                            86400         ; Retry
+                          2419200         ; Expire
+                          604800 )        ; Negative Cache TTL
+  ;
+  1.187.192.in-addr.arpa.   IN      NS      abimanyu.b18.com.
+  2                         IN      PTR     abimanyu.b18.com.
+  ```
+
+**Testing**
+
+```
+host -t PTR 192.187.1.2
+```
+
+FOTO TESTTING 5
+
+## Nomor 6
+
+### Soal
+
+Agar dapat tetap dihubungi ketika DNS Server Yudhistira bermasalah, buat juga Werkudara sebagai DNS Slave untuk domain utama.
+
+### Pembahasaan
+
+**Konfigurasi pada Yudhistira**
+
+- Edit file **named.conf.local**
+
+  ```
+  nano /etc/bind/named.conf.local
+  ```
+
+- Untuk membuat werkudara sebagai dns salve maka kita akan menambahkan beberapa syntax pada kedua zone domain.
+
+  ```
+  notify yes;
+  also-notify { 192.187.2.3; };
+  allow-transfer { 92.187.2.3; };
+  ```
+
+> named.conf.local _Yudhistira_
+
+FOTO NCL MSTR
+
+**Konfigurasi pada Werkudara**
+
+- Edit file **named.conf.local**
+
+  ```
+  nano /etc/bind/named.conf.local
+  ```
+
+- Tambahkan zone untuk masing-masing domain namun dengan tipe slave dan masters yang mengarah ke IP _Yudhistira_
+
+  ```
+  zone "arjuna.b18.com" {
+  type slave;
+  masters { 192.187.2.2; };
+  file "/var/lib/bind/arjuna.b18.com";
+  };
+
+  zone "abimanyu.b18.com" {
+  type slave;
+  masters { 192.187.2.2; };
+  file "/var/lib/bind/abimanyu.b18.com";
+  };
+  ```
+
+**Testing**
+
+```
+Yudhistira
+service bind9 stop
+
+Werkudara
+service bind9 restart
+
+Nakula
+ping arjuna.b18.com
+ping abimanyu.b18.com
+```
+
+![image](https://github.com/aryansfw/Jarkom-Modul-2-B18-2023/assets/114483889/4f84d7e3-3ac5-4c56-8c5b-5af93339b859)
+
+
+## Nomor 7
+
+### Soal
+Seperti yang kita tahu karena banyak sekali informasi yang harus diterima, buatlah subdomain khusus untuk perang yaitu **baratayuda.abimanyu.yyy.com** dengan alias **www.baratayuda.abimanyu.yyy.com** yang didelegasikan dari Yudhistira ke Werkudara dengan IP menuju ke Abimanyu dalam folder Baratayuda.
+
+### Pembahasan
+
+**Konfigurasi Yudhistira**
+- Edit file **abimanyu.b18.com**
+
+  ```
+  nano /etc/bind/website/abimanyu.b18.com
+  ```
+  Karena hanya domain *Abimanyu* yang diminta untuk di delegasi
+
+- Tambahkan syntax berikut
+
+  ```
+  ns1    	  IN      A       192.187.2.3 
+  baratayuda      IN      NS      ns1
+  ```
+  bisa dilihat bahwa name server baratayda mengarah ke ns1 sedangkan ns1 mengarahkan IP nya ke DNS SLAVE
+
+**Konfigurasi Werkudara**
+
 
 ## Nomor 11
 
