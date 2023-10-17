@@ -481,3 +481,302 @@ $ lynx www.parikesit.abimanyu.b18.com/link-random
 untuk mencoba error 404 not found. Maka akan muncul tampilan seperti ini.
 
 << Tampilan >>
+
+## Nomor 16
+
+### Soal
+
+Buatlah suatu konfigurasi virtual host agar file asset **www.parikesit.abimanyu.yyy.com/public/js** menjadi **www.parikesit.abimanyu.yyy.com/js**
+
+### Pembahasan
+
+Pada soal ini, kita bisa ke node Abimanyu lalu edit konfigurasi web servernya menjadi seperti berikut.
+
+> /etc/apache2/sites-available/parikesit.abimanyu.b18.com.conf
+
+```apache
+<VirtualHost *:80>
+	ServerAdmin webmaster@localhost
+	DocumentRoot /var/www/parikesit.abimanyu.b18
+	ServerName parikesit.abimanyu.b18.com
+	ServerAlias www.parikesit.abimanyu.b18.com
+
+	<Directory /var/www/parikesit.abimanyu.b18/public>
+    		Options +Indexes
+	</Directory>
+
+	<Directory /var/www/parikesit.abimanyu.b18/secret>
+		Deny from all
+	</Directory>
+
+	Alias "/js" "/var/www/parikesit.abimanyu.b18/public/js"
+
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+	ErrorDocument 403 /error/403.html
+	ErrorDocument 404 /error/404.html
+</VirtualHost>
+```
+
+Lalu restart service `apache2` menggunakan
+
+```
+$ service apache2 restart
+```
+
+Untuk mencobanya, kita bisa ke node client lalu menjalankan command
+
+```
+$ lynx www.parikesit.abimanyu.b18.com/js
+```
+
+Maka akan muncul tampilan seperti ini.
+
+<< Tampilan >>
+
+## Nomor 17
+
+### Soal
+
+Agar aman, buatlah konfigurasi agar **www.rjp.baratayuda.abimanyu.yyy.com** hanya dapat diakses melalui port 14000 dan 14400.
+
+### Pembahasan
+
+Pada soal ini, kita harus membuat webserver untuk www.rjp.baratayuda.abimanyu.b18.com terlebih dahulu. Kita bisa menggunakan cara yang sama seperti nomor 11, yaitu ke node Abimanyu kemudian rename folder **rjp.baratayuda.abimanyu.yyy.com** yang diperoleh dari drive resources menjadi **rjp.baratayuda.abimanyu.b18** lalu copy folder tersebut ke `/var/www`. Selanjutnya, tambahin file konfigurasi di `/etc/apache2/sites-available/rjp.baratayuda.abimanyu.b18.com.conf` berisi
+
+> /etc/apache2/sites-available/rjp.baratayuda.abimanyu.b18.com.conf
+
+```apache
+<VirtualHost *:14000 *:14400>
+	ServerAdmin webmaster@localhost
+	DocumentRoot /var/www/rjp.baratayuda.abimanyu.b18
+	ServerName rjp.baratayuda.abimanyu.b18.com
+	ServerAlias www.rjp.baratayuda.abimanyu.b18.com
+
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+
+<VirtualHost *:80>
+	ServerName rjp.baratayuda.abimanyu.b18.com
+	ServerAlias www.rjp.baratayuda.abimanyu.b18.com
+
+	Redirect 403 /
+</VirtualHost>
+
+```
+
+Setelah itu, kita bisa mengaktifkan website tersebut dan restart service `apache2` menggunakan
+
+```
+$ a2ensite rjp.baratayuda.abimanyu.b18.com.conf
+$ service apache2 restart
+```
+
+Untuk mencobanya, kita bisa ke node client lalu menjalankan command
+
+```
+$ lynx www.rjp.baratayuda.abimanyu.b18.com
+```
+
+Tampilan yang muncul yaitu 403 forbidden.
+<< Tampilan forbidden >>
+
+Jika kita menjalankan command berikut,
+
+```
+$ lynx www.rjp.baratayuda.abimanyu.b18.com:14000
+atau
+$ lynx www.rjp.baratayuda.abimanyu.b18.com:14400
+```
+
+Maka akan muncul tampilan seperti ini.
+
+<< Tampilan >>
+
+## Nomor 18
+
+### Soal
+
+Untuk mengaksesnya buatlah autentikasi username berupa “Wayang” dan password “baratayudayyy” dengan yyy merupakan kode kelompok. Letakkan DocumentRoot pada /var/www/rjp.baratayuda.abimanyu.yyy.
+
+### Pembahasan
+
+Pada soal ini, kita bisa ke node Abimanyu lalu menjalankan perintah berikut untuk membuat user untuk autentikasi
+
+```
+$ htpasswd -c /etc/apache2/.htpasswd Wayang
+New password: baratayudab18
+Re-type new password: baratayudab18
+Adding password for user Wayang
+```
+
+Kemudian kita bisa edit konfigurasi seperti berikut
+
+> /etc/apache2/sites-available/rjp.baratayuda.abimanyu.b18.com.conf
+
+```apache
+<VirtualHost *:14000 *:14400>
+	ServerAdmin webmaster@localhost
+	DocumentRoot /var/www/rjp.baratayuda.abimanyu.b18
+	ServerName rjp.baratayuda.abimanyu.b18.com
+	ServerAlias www.rjp.baratayuda.abimanyu.b18.com
+
+	<Directory /var/www/rjp.baratayuda.abimanyu.b18>
+		AuthType Basic
+		AuthName "Autentikasi Dulu"
+		AuthUserFile "/etc/apache2/.htpasswd"
+		Require user Wayang
+	</Directory>
+
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+
+<VirtualHost *:80>
+	ServerName rjp.baratayuda.abimanyu.b18.com
+	ServerAlias www.rjp.baratayuda.abimanyu.b18.com
+
+	Redirect 403 /
+</VirtualHost>
+```
+
+Setelah itu, kita bisa restart service `apache2` menggunakan
+
+```
+$ service apache2 restart
+```
+
+Untuk mencobanya, kita bisa ke node client lalu menjalankan command
+
+```
+$ lynx www.rjp.baratayuda.abimanyu.b18.com:14000
+atau
+$ lynx www.rjp.baratayuda.abimanyu.b18.com:14400
+```
+
+Maka akan muncul tampilan seperti ini.
+
+<< Tampilan >>
+
+## Nomor 19
+
+### Soal
+
+Buatlah agar setiap kali mengakses IP dari Abimanyu akan secara otomatis dialihkan ke www.abimanyu.yyy.com **(alias)**
+
+### Pembahasan
+
+Untuk soal ini, kita bisa ke node Abimanyu lalu edit konfigurasi seperti berikut.
+
+> /etc/apache2/sites-available/abimanyu.b18.com.conf
+
+```apache
+<VirtualHost *:80>
+	ServerAdmin webmaster@localhost
+	DocumentRoot /var/www/abimanyu.b18
+	ServerName abimanyu.b18.com
+	ServerAlias www.abimanyu.b18.com
+	ServerAlias 192.187.1.2
+
+	Alias "/home" "/var/www/abimanyu.b18/index.php/home"
+
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+
+Lalu restart service `apache2` menggunakan
+
+```
+$ service apache2 restart
+```
+
+Untuk mencobanya, kita bisa ke node client lalu menjalankan command
+
+```
+$ lynx 192.187.1.2
+```
+
+Maka akan muncul tampilan seperti ini.
+
+<< Tampilan >>
+
+## Nomor 20
+
+### Soal
+
+Karena website **www.parikesit.abimanyu.yyy.com** semakin banyak pengunjung dan banyak gambar gambar random, maka ubahlah request gambar yang memiliki substring “abimanyu” akan diarahkan menuju abimanyu.png.
+
+### Pembahasan
+
+Untuk soal ini, kita bisa ke node Abimanyu lalu di path `/var/www/parikesit.abimanyu.b18`, kita dapat menambahkan file `.htaccess` seperti ini
+
+> /var/www/parikesit.abimanyu.b18/.htaccess
+
+```apache
+RewriteEngine On
+RewriteBase /
+RewriteCond %{REQUEST_URI} !/public/images/abimanyu.png
+RewriteRule .*abimanyu.*\.(jpg|jpeg|png|webp)$ /public/images/abimanyu.png [NC,L]
+```
+
+Penjelasan:
+
+- **RewriteEngine On**: untuk mengaktifkan modul rewrite
+- **RewriteBase /**: rewrite akan diaplikasikan pada URL relatif dari root website
+- **RewriteCond %{REQUEST_URI} !/public/images/abimanyu.png**: kondisi ini cek apabila URI tidak mengandung `/public/images/abimanyu.png`
+- **RewriteRule ._abimanyu._\.(jpg|jpeg|png|webp)$ /public/images/abimanyu.png [NC,L]**: jika URI terdapat "abimanyu" dan merupakan tipe file gambar seperti jpg, jpeg, png, dan webp maka akan menulis kembali URL menjadi `/public/images/abimanyu.png`
+
+Kemudian, kita bisa edit konfigurasi seperti berikut
+
+> /etc/apache2/sites-available/parikesit.abimanyu.b18.com.conf
+
+```apache
+<VirtualHost *:80>
+	ServerAdmin webmaster@localhost
+	DocumentRoot /var/www/parikesit.abimanyu.b18
+	ServerName parikesit.abimanyu.b18.com
+	ServerAlias www.parikesit.abimanyu.b18.com
+
+	<Directory /var/www/parikesit.abimanyu.b18>
+		Options +FollowSymLinks -Multiviews
+		AllowOverride All
+	</Directory>
+
+	<Directory /var/www/parikesit.abimanyu.b18/public>
+    		Options +Indexes
+	</Directory>
+
+	<Directory /var/www/parikesit.abimanyu.b18/secret>
+		Deny from all
+	</Directory>
+
+	Alias "/js" "/var/www/parikesit.abimanyu.b18/public/js"
+
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+	ErrorDocument 403 /error/403.html
+	ErrorDocument 404 /error/404.html
+</VirtualHost>
+
+```
+
+Lalu mengaktifkan modul `rewrite` dan restart service `apache2` menggunakan
+
+```
+$ a2enmod rewrite
+$ service apache2 restart
+```
+
+Untuk mencobanya, kita bisa ke node client lalu menjalankan command
+
+```
+$ lynx www.parikesit.abimanyu.b18.com/ini/adalah/test/testabimanyutest.png
+```
+
+Maka akan muncul tampilan seperti ini untuk mendownload file `/public/images/abimanyu.png`
+
+<< Tampilan >>
